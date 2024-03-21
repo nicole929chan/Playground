@@ -30,4 +30,41 @@ public class CategoryService : ICategoryService
             throw new Exception("Error in CategoryService.GetAllAsync", ex);
         }
     }
+
+    public async Task<CategoryResult?> GetByIdAsync(int id)
+    {
+        try
+        {
+            var category = await _categoryRepository.GetByIdAsync(id);
+            if (category == null)
+            {
+                return null;
+            }
+            return new CategoryResult
+            {
+                Id = category.Id,
+                Name = category.Name,
+                Description = category.Description,
+                IsDeleted = category.IsDeleted,
+                CreatedAt = category.CreatedAt,
+                UpdatedAt = category.UpdatedAt,
+                Products = category.Products.Select(p => new ProductResult
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    ImageUrl = p.ImageUrl,
+                    Price = p.Price,
+                    IsDeleted = p.IsDeleted,
+                    CreatedAt = p.CreatedAt,
+                    UpdatedAt = p.UpdatedAt,
+                    CategoryId = p.CategoryId
+                }).ToList()
+            };
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error in CategoryService.GetByIdAsync", ex);
+        }
+    }
 }

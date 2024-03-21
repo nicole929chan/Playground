@@ -25,4 +25,32 @@ public class CategoryRepository : ICategoryRepository
             throw new Exception("Error in CategoryRepository.GetAllAsync", ex);
         }
     }
+
+    public async Task<Category?> GetByIdAsync(int id)
+    {
+        try
+        {
+            using var connection = _dbContext.Create();
+            string sql = @"
+                SELECT * FROM Categories WHERE id = @id
+                SELECT * FROM Products WHERE CategoryId = @id";
+
+            var result = await connection.QueryMultipleAsync(sql, new { id });
+            var category = await result.ReadFirstOrDefaultAsync<Category>();
+            if (category != null)
+            {
+                category.Products = (await result.ReadAsync<Product>()).ToList();
+            }
+
+            return category;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error in CategoryRepository.GetByIdAsync", ex);
+        }
+
+
+
+
+    }
 }

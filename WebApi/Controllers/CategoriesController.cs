@@ -33,9 +33,17 @@ public class CategoriesController : ControllerBase
 
     // GET api/<CategoriesController>/5
     [HttpGet("{id}")]
-    public string Get(int id)
+    public async Task<IActionResult> Get(int id)
     {
-        return "value";
+        try
+        {
+            var category = await _categoryService.GetByIdAsync(id);
+            return category != null ? Ok(category) : NotFound();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     // POST api/<CategoriesController>

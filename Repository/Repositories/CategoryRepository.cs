@@ -11,11 +11,18 @@ public class CategoryRepository : ICategoryRepository
         _dbContext = dbContext;
     }
 
-    public Task<IEnumerable<Category>> GetAllAsync()
+    public async Task<IEnumerable<Category>> GetAllAsync()
     {
-        using var connection = _dbContext.Create();
-        string sql = @"SELECT * FROM Categories";
+        try
+        {
+            using var connection = _dbContext.Create();
+            string sql = @"SELECT * FROM Categories ORDER BY id";
 
-        return connection.QueryAsync<Category>(sql);
+            return await connection.QueryAsync<Category>(sql);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error in CategoryRepository.GetAllAsync", ex);
+        }
     }
 }

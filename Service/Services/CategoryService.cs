@@ -1,4 +1,5 @@
-﻿using Repository.Repositories;
+﻿using Repository.Entities;
+using Repository.Repositories;
 using Service.Dtos;
 
 namespace Service.Services;
@@ -67,4 +68,22 @@ public class CategoryService : ICategoryService
             throw new Exception("Error in CategoryService.GetByIdAsync", ex);
         }
     }
+
+    public async Task<int> CreateAsync(CategoryCreate category)
+    {
+        var result = await _categoryRepository.CreateAsync(new Category
+        {
+            Name = category.Name,
+            Description = category.Description,
+            CreatedAt = category.CreatedAt,
+            UpdatedAt = category.UpdatedAt
+        });
+
+        return result;
+    }
+
+    //Task<CategoryResult> 9CreateAsync(CategoryCreateRequest category)
+    //{
+    //    throw new NotImplementedException();
+    //}
 }

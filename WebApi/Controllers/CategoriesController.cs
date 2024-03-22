@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Service.Dtos;
 using Service.Services;
+using WebApi.ViewModels;
+using WebApi.ViewModels.Validations;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -48,8 +51,25 @@ public class CategoriesController : ControllerBase
 
     // POST api/<CategoriesController>
     [HttpPost]
-    public void Post([FromBody] string value)
+    public async Task<IActionResult> Post([FromBody] CategoryInfo categoryInfo)
     {
+        var validator = new CategoryInfoValidator();
+        var results = validator.Validate(categoryInfo);
+
+        if (!results.IsValid)
+        {
+            return StatusCode(422, results.Errors);
+        }
+
+        var categoryCreate = new CategoryCreate
+        {
+            Name = categoryInfo.Name,
+            Description = categoryInfo.Description
+        };
+
+        var category = await _categoryService.CreateAsync(categoryCreate);
+
+        return Ok(category);
     }
 
     // PUT api/<CategoriesController>/5

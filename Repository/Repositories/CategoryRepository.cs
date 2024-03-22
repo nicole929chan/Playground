@@ -48,9 +48,32 @@ public class CategoryRepository : ICategoryRepository
         {
             throw new Exception("Error in CategoryRepository.GetByIdAsync", ex);
         }
+    }
 
+    public async Task<int> CreateAsync(Category category)
+    {
+        try
+        {
+            using var connection = _dbContext.Create();
+            //string sql = @"
+            //    INSERT INTO Categories (Name, Description, CreatedAt, UpdatedAt)
+            //    VALUES (@Name, @Description, @CreatedAt, @UpdatedAt)";
 
+            //var count = await connection.ExecuteAsync(sql, category);
+            //return count;
 
+            string sql = @"
+                INSERT INTO Categories (Name, Description, CreatedAt, UpdatedAt)
+                VALUES (@Name, @Description, @CreatedAt, @UpdatedAt);
+                SELECT SCOPE_IDENTITY();";
 
+            var categoryId = await connection.ExecuteScalarAsync<int>(sql, category);
+
+            return categoryId;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error in CategoryRepository.CreateAsync", ex);
+        }
     }
 }

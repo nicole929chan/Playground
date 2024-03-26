@@ -100,8 +100,16 @@ public class CategoryRepository : ICategoryRepository
         try
         {
             using var connection = _dbContext.Create();
-            string sql = @"
-                DELETE FROM Categories WHERE Id = @Id";
+            string sql = @"SELECT * FROM Products WHERE CategoryId = @id";
+
+            var products = await connection.QueryAsync<Product>(sql, new { id });
+            if (products.Count() > 0)
+            {
+                sql = "UPDATE Products SET CategoryId = NULL WHERE CategoryId = @id";
+                await connection.ExecuteAsync(sql, new { id });
+            }
+
+            sql = @"DELETE FROM Categories WHERE Id = @Id";
 
             return await connection.ExecuteAsync(sql, new { Id = id });
         }

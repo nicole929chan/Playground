@@ -98,7 +98,17 @@ public class CategoriesController : ControllerBase
 
     // DELETE api/<CategoriesController>/5
     [HttpDelete("{id}")]
-    public void Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
+        try
+        {
+            var result = await _categoryService.DeleteAsync(id);
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }

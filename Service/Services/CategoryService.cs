@@ -106,8 +106,23 @@ public class CategoryService : ICategoryService
         }
     }
 
-    //Task<CategoryResult> 9CreateAsync(CategoryCreateRequest category)
-    //{
-    //    throw new NotImplementedException();
-    //}
+    public async Task<int> DeleteAsync(int id)
+    {
+        try
+        {
+            var entity = await _categoryRepository.GetByIdAsync(id);
+            if (entity == null)
+            {
+                throw new Exception("Category not found");
+            }
+
+            var result = await _categoryRepository.DeleteAsync(id);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error in CategoryService.DeleteAsync", ex);
+        }
+    }
 }

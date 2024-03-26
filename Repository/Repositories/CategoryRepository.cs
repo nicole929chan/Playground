@@ -94,4 +94,20 @@ public class CategoryRepository : ICategoryRepository
             throw new Exception("Error in CategoryRepository.UpdateAsync", ex);
         }
     }
+
+    public async Task<int> DeleteAsync(int id)
+    {
+        try
+        {
+            using var connection = _dbContext.Create();
+            string sql = @"
+                DELETE FROM Categories WHERE Id = @Id";
+
+            return await connection.ExecuteAsync(sql, new { Id = id });
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error in CategoryRepository.DeleteAsync", ex);
+        }
+    }
 }

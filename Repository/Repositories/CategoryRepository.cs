@@ -76,4 +76,22 @@ public class CategoryRepository : ICategoryRepository
             throw new Exception("Error in CategoryRepository.CreateAsync", ex);
         }
     }
+
+    public async Task<int> UpdateAsync(Category category)
+    {
+        try
+        {
+            using var connection = _dbContext.Create();
+            string sql = @"
+                UPDATE Categories
+                SET Name = @Name, Description = @Description, IsDeleted = @IsDeleted, UpdatedAt = @UpdatedAt
+                WHERE Id = @Id";
+
+            return await connection.ExecuteAsync(sql, category);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error in CategoryRepository.UpdateAsync", ex);
+        }
+    }
 }

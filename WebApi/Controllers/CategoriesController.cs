@@ -74,8 +74,26 @@ public class CategoriesController : ControllerBase
 
     // PUT api/<CategoriesController>/5
     [HttpPut("{id}")]
-    public void Put(int id, [FromBody] string value)
+    public async Task<IActionResult> Put(int id, [FromBody] CategoryInfo categoryInfo)
     {
+        try
+        {
+            var categoryUpdate = new CategoryUpdate
+            {
+                Id = id,
+                Name = categoryInfo.Name,
+                Description = categoryInfo.Description,
+                IsDeleted = categoryInfo.IsDeleted
+            };
+
+            var result = await _categoryService.UpdateAsync(categoryUpdate);
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     // DELETE api/<CategoriesController>/5

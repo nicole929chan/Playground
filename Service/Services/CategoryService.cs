@@ -82,6 +82,30 @@ public class CategoryService : ICategoryService
         return result;
     }
 
+    public async Task<int> UpdateAsync(CategoryUpdate category)
+    {
+        try
+        {
+            var entity = await _categoryRepository.GetByIdAsync(category.Id);
+            if (entity == null)
+            {
+                throw new Exception("Category not found");
+            }
+
+            entity.Name = category.Name;
+            entity.Description = category.Description;
+            entity.IsDeleted = (bool)category.IsDeleted;
+            entity.UpdatedAt = category.UpdatedAt;
+
+            var result = await _categoryRepository.UpdateAsync(entity);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error in CategoryService.UpdateAsync", ex);
+        }
+    }
+
     //Task<CategoryResult> 9CreateAsync(CategoryCreateRequest category)
     //{
     //    throw new NotImplementedException();

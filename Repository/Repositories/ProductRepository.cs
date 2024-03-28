@@ -27,4 +27,22 @@ public class ProductRepository : IProductRepository
             throw new Exception("Error in ProductRepository.GetByIdAsync", ex);
         }
     }
+
+    public async Task<int> UpdateAsync(Product product)
+    {
+        try
+        {
+            var connection = _dbContext.Create();
+
+            string sql = @"UPDATE Products SET Name = @Name, Description = @Description, 
+                Price = @Price, IsDeleted = @IsDeleted 
+                WHERE Id = @Id";
+
+            return await connection.ExecuteAsync(sql, product);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error in ProductRepository.UpdateAsync", ex);
+        }
+    }
 }

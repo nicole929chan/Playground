@@ -5,10 +5,12 @@ namespace Service.Services;
 public class ProductService : IProductService
 {
     private readonly IProductRepository _productRepository;
+    private readonly IPriceLogService _priceLogService;
 
-    public ProductService(IProductRepository productRepository)
+    public ProductService(IProductRepository productRepository, IPriceLogService priceLogService)
     {
         _productRepository = productRepository;
+        _priceLogService = priceLogService;
     }
     public async Task<ProductResult?> GetByIdAsync(int id)
     {
@@ -46,6 +48,14 @@ public class ProductService : IProductService
                 throw new Exception("Product not found");
             }
 
+            //IsWritable handler = HasChanged;
+            //bool changed = handler((decimal)entity.Price, (decimal)product.Price);
+            //if (changed)
+            //{
+            //    var princeLog = _priceLogService.MakePriceLog(product.Id, 1, (decimal)entity.Price, (decimal)product.Price, "Price changed");
+            //    await _priceLogService.AddAsync(princeLog);
+            //}
+
             entity.Name = product.Name;
             entity.Price = product.Price;
             entity.Description = product.Description;
@@ -60,4 +70,11 @@ public class ProductService : IProductService
             throw new Exception("Error in ProductService.UpdateAsync", ex);
         }
     }
+
+    //private bool HasChanged(decimal oldPrice, decimal newPrice)
+    //{
+    //    return oldPrice != newPrice;
+    //}
+
+    //public delegate bool IsWritable(decimal oldPrice, decimal newPrice);
 }

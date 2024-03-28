@@ -9,6 +9,7 @@ public static class DependencyInjection
     {
         services.AddScoped<IDbContext, SqlServerConnection>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<IProductRepository, ProductRepository>();
 
         return services;
     }

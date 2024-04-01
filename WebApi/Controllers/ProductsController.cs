@@ -72,7 +72,7 @@ public class ProductsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, ex.Message);
+            throw new Exception("Error in ProductsController.Put", ex);
         }
 
     }

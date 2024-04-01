@@ -1,6 +1,9 @@
-using Repository;
+﻿using Repository;
 using Service;
+using WebApi.Middlewares;
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddTransient<GlobalExceptionHandler>();
 
 // Add services to the container.
 builder.Services.AddServices();
@@ -23,6 +26,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+// 放在ap之前, 若ap出现異常, ap返回的例外信息會被此處攔截
+app.UseMiddleware<GlobalExceptionHandler>();
 
 app.MapControllers();
 

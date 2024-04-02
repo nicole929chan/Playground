@@ -28,21 +28,55 @@ public class CategoryRepository : ICategoryRepository
 
     public async Task<Category?> GetByIdAsync(int id)
     {
+        //try
+        //{
+        //    using var connection = _dbContext.Create();
+        //    string sql = @"
+        //        SELECT * FROM Categories WHERE id = @id
+        //        SELECT * FROM Products WHERE CategoryId = @id";
+
+        //    var result = await connection.QueryMultipleAsync(sql, new { id });
+        //    var category = await result.ReadFirstOrDefaultAsync<Category>();
+        //    if (category != null)
+        //    {
+        //        category.Products = (await result.ReadAsync<Product>()).ToList();
+        //    }
+
+        //    return category;
+        //}
+        //catch (Exception ex)
+        //{
+        //    throw new Exception("Error in CategoryRepository.GetByIdAsync", ex);
+        //}
+
         try
         {
             using var connection = _dbContext.Create();
+
+            var data = new Dictionary<int, Category>();
+
             string sql = @"
-                SELECT * FROM Categories WHERE id = @id
-                SELECT * FROM Products WHERE CategoryId = @id";
-
-            var result = await connection.QueryMultipleAsync(sql, new { id });
-            var category = await result.ReadFirstOrDefaultAsync<Category>();
-            if (category != null)
+                SELECT P.*, C.*  
+                FROM Categories AS C inner join Products AS P ON C.Id = P.CategoryId
+                WHERE C.Id = @id";
+            await connection.QueryAsync<Product, Category, Category>(sql, (product, category) =>
             {
-                category.Products = (await result.ReadAsync<Product>()).ToList();
-            }
+                if (data.TryGetValue(category.Id, out var existingCategory))
+                {
+                    category = existingCategory;
+                }
+                else
+                {
+                    data.Add(category.Id, category);
+                }
 
-            return category;
+                category.Products.Add(product);
+
+                return category;
+
+            }, new { id }, splitOn: "Id");  // 此處的 splitOn: "Id" 是指定分割點，C與P都有Id，取第一個出現(P.Id)
+
+            return data[id];
         }
         catch (Exception ex)
         {

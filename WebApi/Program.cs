@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Repository;
 using Service;
+using WebApi.DelegatingHandlers;
 using WebApi.GitHub.Api;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,10 +26,11 @@ builder.Services.AddHttpClient("github", (serviceProvider, client) =>
     client.DefaultRequestHeaders.Add("User-Agent", settings.UserAgent);
 
     client.BaseAddress = new Uri("https://api.github.com");
-});
+})
+    .AddHttpMessageHandler<LoggingHandler>();
 
 builder.Services.AddTransient<GitHubService>();
-//builder.Services.AddTransient<LoggingHandler>();
+builder.Services.AddTransient<LoggingHandler>();
 
 var app = builder.Build();
 

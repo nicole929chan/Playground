@@ -25,9 +25,16 @@ public class GitHubController : ControllerBase
     [HttpGet("{username}")]
     public async Task<IActionResult> Get(string username)
     {
-        var result = await _gitHubService.GetUserAsync(username);
+        try
+        {
+            var result = await _gitHubService.GetUserAsync(username);
 
-        return Ok(result);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     // POST api/<GitHubController>

@@ -11,11 +11,18 @@ public class GitHubService
 
     public async Task<GitHubUser?> GetUserAsync(string username)
     {
-        var client = _factory.CreateClient("github");
+        try
+        {
+            var client = _factory.CreateClient("github");
 
-        GitHubUser? user = await client
-            .GetFromJsonAsync<GitHubUser>($"users/{username}");
+            GitHubUser? user = await client
+                .GetFromJsonAsync<GitHubUser>($"users/{username}");
 
-        return user;
+            return user;
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new HttpRequestException("Failed to get user", ex);
+        }
     }
 }

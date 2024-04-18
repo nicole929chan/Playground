@@ -1,11 +1,19 @@
 ﻿using Microsoft.Extensions.Options;
 using Repository;
 using Service;
+using Service.Services.Cart.Availibility;
 using WebApi.DelegatingHandlers;
 using WebApi.GitHub.Api;
 var builder = WebApplication.CreateBuilder(args);
 
 //builder.Services.AddTransient<GlobalExceptionHandler>();
+
+builder.Services.AddScoped<IAvailabilityService>(provider =>
+{
+    return new PurchaseLimitFeature(
+        new QuantityLimitFeature(
+            new AvailabilityService()));
+});
 
 // Add services to the container.
 builder.Services.AddServices();

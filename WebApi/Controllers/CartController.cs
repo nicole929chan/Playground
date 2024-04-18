@@ -9,6 +9,12 @@ namespace WebApi.Controllers;
 [ApiController]
 public class CartController : ControllerBase
 {
+    private readonly IAvailabilityService _cartLimitation;
+
+    public CartController(IAvailabilityService cartLimitation)
+    {
+        _cartLimitation = cartLimitation;
+    }
     // GET: api/<CartController>
     [HttpGet]
     public IEnumerable<string> Get()
@@ -29,10 +35,7 @@ public class CartController : ControllerBase
     {
         try
         {
-            var checker = new AvailabilityService();
-            var feature1 = new QuantityLimitFeature(checker);
-            var feature2 = new PurchaseLimitFeature(feature1);
-            var isAvailable = await feature2.IsAvailableAsync(request.ProductId, request.Quantity);
+            var isAvailable = await _cartLimitation.IsAvailableAsync(request.ProductId, request.Quantity);
 
             if (isAvailable)
             {

@@ -5,7 +5,7 @@ public class ActivatePurchase : IObserver<Stock>
 {
     public void OnCompleted()
     {
-        throw new NotImplementedException();
+        Console.WriteLine("採購單已自動新增");
     }
 
     public void OnError(Exception error)
@@ -15,6 +15,6 @@ public class ActivatePurchase : IObserver<Stock>
 
     public void OnNext(Stock value)
     {
-        Console.WriteLine($"Stock {value.ProductId} 已自動新增一張採購單");
+        Console.WriteLine($"Stock {value.ProductId} 自動新增一張採購單");
     }
 }

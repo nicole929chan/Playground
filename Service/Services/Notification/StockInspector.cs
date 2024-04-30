@@ -25,6 +25,15 @@ public class StockInspector : IObservable<Stock>
             {
                 observer.OnNext(stock);
             }
+            NotifyComplete();
+        }
+    }
+
+    private void NotifyComplete()
+    {
+        foreach (var observer in _observers)
+        {
+            observer.OnCompleted();
         }
     }
 

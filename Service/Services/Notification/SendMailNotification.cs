@@ -5,7 +5,7 @@ public class SendMailNotification : IObserver<Stock>
 {
     void IObserver<Stock>.OnCompleted()
     {
-        throw new NotImplementedException();
+        Console.WriteLine("庫存不足，已寄送通知信");
     }
 
     void IObserver<Stock>.OnError(Exception error)

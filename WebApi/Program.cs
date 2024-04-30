@@ -2,10 +2,12 @@
 using Repository;
 using Service;
 using Service.Services.Cart.Availibility;
+using System.Text;
 using WebApi.DelegatingHandlers;
 using WebApi.GitHub.Api;
 var builder = WebApplication.CreateBuilder(args);
 
+Console.OutputEncoding = Encoding.UTF8;
 //builder.Services.AddTransient<GlobalExceptionHandler>();
 
 builder.Services.AddScoped<IAvailabilityService>(provider =>

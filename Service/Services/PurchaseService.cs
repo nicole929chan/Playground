@@ -126,6 +126,8 @@ public class PurchaseService : IPurchaseService
             UpdatedAt = DateTime.Now
         }).ToList();
 
-        await _unitOfWork.SaveChangesAsync(purchase, purchaseItems);
+        purchase.PurchaseItems = purchaseItems;
+
+        await _unitOfWork.SaveChangesAsync(purchase);
     }
 }

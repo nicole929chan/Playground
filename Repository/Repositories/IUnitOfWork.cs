@@ -1,7 +1,5 @@
-﻿using Repository.Entities;
-
-namespace Repository.Repositories;
+﻿namespace Repository.Repositories;
 public interface IUnitOfWork
 {
-    Task SaveChangesAsync(Purchase purchase, IEnumerable<PurchaseItem> purchaseItem);
+    Task SaveChangesAsync<T>(T entity) where T : class;
 }

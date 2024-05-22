@@ -1,53 +1,40 @@
 ﻿using Dapper;
+using Repository;
 using Repository.Entities;
+using Repository.Repositories;
+using System.Data;
 
-namespace Repository.Repositories
+public class PurchaseUnitOfWork : UnitOfWork
 {
-    public class PurchaseUnitOfWork : IUnitOfWork
+    public PurchaseUnitOfWork(IDbContext dbContext) : base(dbContext) { }
+
+    protected override async Task SaveEntitiesAsync<TEntity>(IDbConnection connection, IDbTransaction transaction, TEntity entity)
     {
-        private readonly IDbContext _dbContext;
-
-        public PurchaseUnitOfWork(IDbContext dbContext)
+        if (entity is Purchase purchase)
         {
-            _dbContext = dbContext;
+            // Insert Purchase and get the new PurchaseId
+            string purchaseSql = @"
+                INSERT INTO Purchase (PurchaseNumber, PurchaseDate, VendorId, Status, TotalAmount, CreatedAt, UpdatedAt)
+                VALUES (@PurchaseNumber, @PurchaseDate, @VendorId, @Status, @TotalAmount, @CreatedAt, @UpdatedAt);
+                SELECT CAST(SCOPE_IDENTITY() as int);";
+
+            purchase.Id = await connection.ExecuteScalarAsync<int>(purchaseSql, purchase, transaction);
+
+            // Insert PurchaseItems
+            string purchaseItemSql = @"
+                INSERT INTO PurchaseItem (PurchaseId, ProductId, Sku, Quantity, Price, Amount, CreatedAt, UpdatedAt)
+                VALUES (@PurchaseId, @ProductId, @Sku, @Quantity, @Price, @Amount, @CreatedAt, @UpdatedAt);";
+
+            foreach (var item in purchase.PurchaseItems)
+            {
+                item.PurchaseId = purchase.Id;
+            }
+
+            await connection.ExecuteAsync(purchaseItemSql, purchase.PurchaseItems, transaction);
         }
-
-        public async Task SaveChangesAsync(Purchase purchase, IEnumerable<PurchaseItem> purchaseItems)
+        else
         {
-            using var connection = _dbContext.Create();
-            connection.Open();
-
-            using var transaction = connection.BeginTransaction();
-            try
-            {
-                // Insert into Purchase table and get the new PurchaseId
-                string purchaseSql = @"
-                    INSERT INTO Purchase (PurchaseNumber, PurchaseDate, VendorId, Status, TotalAmount, CreatedAt, UpdatedAt)
-                    VALUES (@PurchaseNumber, @PurchaseDate, @VendorId, @Status, @TotalAmount, @CreatedAt, @UpdatedAt);
-                    SELECT SCOPE_IDENTITY();";
-
-                purchase.Id = await connection.ExecuteScalarAsync<int>(purchaseSql, purchase, transaction);
-
-                // Insert into PurchaseItem table
-                string purchaseItemSql = @"
-                    INSERT INTO PurchaseItem (PurchaseId, ProductId, Sku, Quantity, Price, Amount, CreatedAt, UpdatedAt)
-                    VALUES (@PurchaseId, @ProductId, @Sku, @Quantity, @Price, @Amount, @CreatedAt, @UpdatedAt);";
-
-                foreach (var item in purchaseItems)
-                {
-                    item.PurchaseId = purchase.Id; // Set the PurchaseId for each item
-                }
-
-                await connection.ExecuteAsync(purchaseItemSql, purchaseItems, transaction);
-
-                // Commit transaction
-                transaction.Commit();
-            }
-            catch (Exception)
-            {
-                transaction.Rollback();
-                throw;
-            }
+            throw new InvalidOperationException("Unsupported entity type");
         }
     }
 }

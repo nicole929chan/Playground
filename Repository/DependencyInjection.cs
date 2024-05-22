@@ -13,6 +13,7 @@ public static class DependencyInjection
         services.AddScoped<IPriceLogRepository, PriceLogRepository>();
         services.AddScoped<IPurchaseRepository, PurchaseRepository>();
         services.AddScoped<IPurchaseItemRepository, PurchaseItemRepository>();
+        services.AddScoped<IUnitOfWork, PurchaseUnitOfWork>();
 
         return services;
     }

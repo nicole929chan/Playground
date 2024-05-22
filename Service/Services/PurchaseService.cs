@@ -1,18 +1,19 @@
 ﻿using Repository.Entities;
 using Repository.Repositories;
 using Service.Dtos;
-using System.Transactions;
 
 namespace Service.Services;
 public class PurchaseService : IPurchaseService
 {
     private readonly IPurchaseRepository _purchaseRepository;
     private readonly IPurchaseItemRepository _purchaseItemRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public PurchaseService(IPurchaseRepository purchaseRepository, IPurchaseItemRepository purchaseItemRepository)
+    public PurchaseService(IPurchaseRepository purchaseRepository, IPurchaseItemRepository purchaseItemRepository, IUnitOfWork unitOfWork)
     {
         _purchaseRepository = purchaseRepository;
         _purchaseItemRepository = purchaseItemRepository;
+        _unitOfWork = unitOfWork;
 
     }
     public async Task<PurchaseResult?> GetPurchaseByIdAsync(int id)
@@ -53,51 +54,78 @@ public class PurchaseService : IPurchaseService
         }
     }
 
+    //public async Task CreatePurchaseAsync(PurchaseCreate purchaseCreate)
+    //{
+    //    using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+    //    try
+    //    {
+    //        var purchaseId = 0;
+    //        var purchaseItems = new List<PurchaseItem>();
+    //        var purchase = new Purchase
+    //        {
+    //            PurchaseNumber = "ABC-123",
+    //            PurchaseDate = purchaseCreate.PurchaseDate,
+    //            VendorId = purchaseCreate.VendorId,
+    //            Status = "Draft",
+    //            TotalAmount = purchaseCreate.PurchaseItems.Sum(pi => pi.Quantity * pi.Price),
+    //            CreatedAt = DateTime.Now,
+    //            UpdatedAt = DateTime.Now
+    //        };
+
+    //        purchaseId = await _purchaseRepository.CreateAsync(purchase);
+
+    //        foreach (var pi in purchaseCreate.PurchaseItems)
+    //        {
+    //            var purchaseItem = new PurchaseItem
+    //            {
+    //                PurchaseId = purchaseId,
+    //                ProductId = pi.ProductId,
+    //                Sku = pi.Sku,
+    //                Quantity = pi.Quantity,
+    //                Price = pi.Price,
+    //                Amount = pi.Quantity * pi.Price,
+    //                CreatedAt = DateTime.Now,
+    //                UpdatedAt = DateTime.Now
+    //            };
+
+    //            purchaseItems.Add(purchaseItem);
+
+    //        }
+
+    //        await _purchaseItemRepository.CreateAsync(purchaseItems);
+
+    //        transaction.Complete();
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        throw new Exception(ex.Message);
+    //    }
+    //}
+
     public async Task CreatePurchaseAsync(PurchaseCreate purchaseCreate)
     {
-        using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-        try
+        var purchase = new Purchase
         {
-            var purchaseId = 0;
-            var purchaseItems = new List<PurchaseItem>();
-            var purchase = new Purchase
-            {
-                PurchaseNumber = "ABC-123",
-                PurchaseDate = purchaseCreate.PurchaseDate,
-                VendorId = purchaseCreate.VendorId,
-                Status = "Draft",
-                TotalAmount = purchaseCreate.PurchaseItems.Sum(pi => pi.Quantity * pi.Price),
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now
-            };
+            PurchaseNumber = "XYZ-123",
+            PurchaseDate = purchaseCreate.PurchaseDate,
+            VendorId = purchaseCreate.VendorId,
+            Status = "Draft",
+            TotalAmount = purchaseCreate.PurchaseItems.Sum(pi => pi.Quantity * pi.Price),
+            CreatedAt = DateTime.Now,
+            UpdatedAt = DateTime.Now
+        };
 
-            purchaseId = await _purchaseRepository.CreateAsync(purchase);
-
-            foreach (var pi in purchaseCreate.PurchaseItems)
-            {
-                var purchaseItem = new PurchaseItem
-                {
-                    PurchaseId = purchaseId,
-                    ProductId = pi.ProductId,
-                    Sku = pi.Sku,
-                    Quantity = pi.Quantity,
-                    Price = pi.Price,
-                    Amount = pi.Quantity * pi.Price,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
-                };
-
-                purchaseItems.Add(purchaseItem);
-
-            }
-
-            await _purchaseItemRepository.CreateAsync(purchaseItems);
-
-            transaction.Complete();
-        }
-        catch (Exception ex)
+        var purchaseItems = purchaseCreate.PurchaseItems.Select(pi => new PurchaseItem
         {
-            throw new Exception(ex.Message);
-        }
+            ProductId = pi.ProductId,
+            Sku = pi.Sku,
+            Quantity = pi.Quantity,
+            Price = pi.Price,
+            Amount = pi.Quantity * pi.Price,
+            CreatedAt = DateTime.Now,
+            UpdatedAt = DateTime.Now
+        }).ToList();
+
+        await _unitOfWork.SaveChangesAsync(purchase, purchaseItems);
     }
 }
